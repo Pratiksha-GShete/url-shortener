@@ -1,6 +1,6 @@
 package com.demo.urlShorterDemo.service
 
-import com.demo.urlShorterDemo.exception.InvalidParameterException
+import com.demo.urlShorterDemo.exception.InvalidParametersException
 import com.demo.urlShorterDemo.exception.ObjectAlreadyPresentException
 import com.demo.urlShorterDemo.model.LongUrl
 import com.demo.urlShorterDemo.model.Url
@@ -13,6 +13,7 @@ import java.time.LocalDateTime
 
 @Service
 class UrlShortenerServiceImpl: UrlShortenerService {
+
     @Autowired
     private val lUrlDaoImpl: UrlDaoImpl? = null
 
@@ -33,7 +34,7 @@ class UrlShortenerServiceImpl: UrlShortenerService {
             lUrl.getShortUrl()?.let { lUrlCommonFetchUtil.shortUrlCache?.put(it,full_url) }
             lUrl.getShortUrl()
         } else {
-            throw InvalidParameterException("Invalid Data ,try after sometime")
+            throw InvalidParametersException("Invalid Data ,try after sometime")
         }
     }
 
@@ -54,7 +55,7 @@ class UrlShortenerServiceImpl: UrlShortenerService {
         val lUrl = lUrlDaoImpl!!.fetchUrlDetails("longUrl", lLongUrl!!)
         if (lUrl != null) {
             if (LocalDateTime.now().isAfter(lUrl.getExpireDateTime())) {
-                throw InvalidParameterException("Short Url is expired,please generate new short Url")
+                throw InvalidParametersException("Short Url is expired,please generate new short Url")
             }
             return UrlCommonFetchUtil.localAddress.toString() + "" + lUrl.getShortUrl()
         }
@@ -70,7 +71,7 @@ class UrlShortenerServiceImpl: UrlShortenerService {
             val lUrl = lUrlDaoImpl!!.fetchUrlDetails("shortUrl", lShortUrl!!)
             if (lUrl != null) {
                 if (LocalDateTime.now().isAfter(lUrl.getExpireDateTime())) {
-                    throw InvalidParameterException("Short Url is expired,please generate new short Url")
+                    throw InvalidParametersException("Short Url is expired,please generate new short Url")
                 }
                 return lUrl.getLongUrl()
             }

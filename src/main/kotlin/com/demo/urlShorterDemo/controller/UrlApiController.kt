@@ -1,6 +1,6 @@
 package com.demo.urlShorterDemo.controller
 
-import com.demo.urlShorterDemo.exception.InvalidParameterException
+import com.demo.urlShorterDemo.exception.InvalidParametersException
 import com.demo.urlShorterDemo.model.LongUrl
 import com.demo.urlShorterDemo.service.UrlShortenerServiceImpl
 import com.demo.urlShorterDemo.util.UrlCommonFetchUtil
@@ -45,7 +45,7 @@ class UrlApiController {
             message = "Object already exists"
         ), ApiResponse(code = 500, message = "Internal server error")]
     )
-    @RequestMapping(value = ["/api/url-shortener/url={url}"], method = [RequestMethod.POST])
+    @RequestMapping(value = ["/api/url-shortener/"], method = [RequestMethod.POST])
     fun createUrlShortForLongUrl(@Parameter(description = "long Url to generate the short Url") @Valid @RequestBody longUrl: LongUrl): ResponseEntity<String?>? {
         logger.info("Method : POST /api/url-shortener/url=" + longUrl.fullUrl.toString() + "/")
         val shortUrl: String? = lUrlShortenerServiceImpl?.createShortUrl(longUrl)
@@ -64,33 +64,11 @@ class UrlApiController {
         if (longUrl != null) {
             response.sendRedirect(longUrl)
         } else {
-            throw InvalidParameterException("Invalid Url")
+            throw InvalidParametersException("Invalid Url")
         }
     }
 
-    /*
-	 * @ApiOperation(value = "API to get a shortener URL.")
-	 *
-	 * @RequestMapping(value="/api/short/{shortUrl}", method=RequestMethod.GET)
-	 * public ResponseEntity<String> fetchShortUrl(@PathVariable("longUrl") String
-	 * longUrl) throws IOException {
-	 * logger.info("Method : GET /api/shorturl/"+longUrl+"/"); String shortUrl =
-	 * lUrlShortenerServiceImpl.fetchShortUrl(longUrl); if (shortUrl != null) {
-	 * return new ResponseEntity<String>(shortUrl, HttpStatus.OK); } return new
-	 * ResponseEntity<String>(HttpStatus.NOT_FOUND); }
-	 */
 
-    /*
-	 * @ApiOperation(value = "API to get a shortener URL.")
-	 *
-	 * @RequestMapping(value="/api/short/{shortUrl}", method=RequestMethod.GET)
-	 * public ResponseEntity<String> fetchShortUrl(@PathVariable("longUrl") String
-	 * longUrl) throws IOException {
-	 * logger.info("Method : GET /api/shorturl/"+longUrl+"/"); String shortUrl =
-	 * lUrlShortenerServiceImpl.fetchShortUrl(longUrl); if (shortUrl != null) {
-	 * return new ResponseEntity<String>(shortUrl, HttpStatus.OK); } return new
-	 * ResponseEntity<String>(HttpStatus.NOT_FOUND); }
-	 */
     @ApiOperation(value = "API to get a Full URL.")
     @RequestMapping(value = ["/api/longurl/{shortUrl}"], method = [RequestMethod.GET])
     @Throws(

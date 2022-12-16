@@ -1,6 +1,6 @@
 package com.demo.urlShorterDemo.util
 
-import com.demo.urlShorterDemo.exception.InvalidParameterException
+import com.demo.urlShorterDemo.exception.InvalidParametersException
 import com.demo.urlShorterDemo.model.LongUrl
 import com.demo.urlShorterDemo.model.Url
 import com.demo.urlShorterDemo.repository.UrlDaoImpl
@@ -25,8 +25,6 @@ import com.google.common.cache.Cache
 
 @Component
 class UrlCommonFetchUtil {
-
-
     @Autowired
     private val lUrlDaoImpl: UrlDaoImpl? = null
 
@@ -38,16 +36,17 @@ class UrlCommonFetchUtil {
     @PostConstruct
     fun fetchAllUrlFromDb() {
         val lUrlList: List<Url?>? = lUrlDaoImpl!!.fetchAllUrl()
+        urlCache = CacheBuilder.newBuilder().maximumSize(cacheServiceMaxEntries.toLong())
+                .expireAfterAccess(cacheExpireTimePeriod.toLong(), TimeUnit.HOURS).build()
+        shortUrlCache = CacheBuilder.newBuilder().maximumSize(cacheServiceMaxEntries.toLong())
+                .expireAfterAccess(cacheExpireTimePeriod.toLong(), TimeUnit.HOURS).build()
         for (url in lUrlList!!) {
             val lMapUrl = HashMap<String, Any?>()
             lMapUrl[EXPIRE_DATE] = url?.getExpireDateTime()
             lMapUrl[RANDOM_URL] = url?.getShortUrl()
-            urlCache = CacheBuilder.newBuilder().maximumSize(cacheServiceMaxEntries.toLong())
-                    .expireAfterAccess(cacheExpireTimePeriod.toLong(), TimeUnit.HOURS).build()
             (urlCache as Cache<String, HashMap<String, Any?>>?)?.put(url?.getLongUrl()!!, lMapUrl)
-            shortUrlCache = CacheBuilder.newBuilder().maximumSize(cacheServiceMaxEntries.toLong())
-                    .expireAfterAccess(cacheExpireTimePeriod.toLong(), TimeUnit.HOURS).build()
             (shortUrlCache as Cache<String, String>?)?.put(url!!.getShortUrl()!!, url!!.getLongUrl()!!)
+
         }
     }
 
@@ -62,17 +61,17 @@ class UrlCommonFetchUtil {
 
     fun validateLongUrl(lLongUrl: LongUrl?) {
         if (lLongUrl == null || !StringUtils.hasText(lLongUrl.fullUrl)) {
-            throw InvalidParameterException("Long Url is empty")
+            throw InvalidParametersException("Long Url is empty")
         }
         if (!validateUrl(lLongUrl.fullUrl)) {
-            throw InvalidParameterException("Invalid Url : " + lLongUrl.fullUrl)
+            throw InvalidParametersException("Invalid Url : " + lLongUrl.fullUrl)
         }
     }
 
     fun randomString(): String? {
         var randomStr = ""
         val possibleChars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"
-        for (i in 0..4) randomStr += possibleChars[Math.floor(Math.random() * possibleChars.length)
+        for (i in 0..8) randomStr += possibleChars[Math.floor(Math.random() * possibleChars.length)
                 .toInt()]
         return randomStr
     }

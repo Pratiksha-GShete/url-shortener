@@ -1,5 +1,5 @@
 package com.demo.urlShorterDemo.exception
 
 data class ErrorMessage(
-    val  message:String
+        val message: String?
 )
